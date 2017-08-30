@@ -1,0 +1,6 @@
+The CSV file to use for localizing strings needs to be formatted in the following way:
+
+- the first row needs to have the language codes, ie: en,fr,es,nl
+- the other rows need to be the sentences for each language, ie: Monday,Lundi,Lunes,Maandag
+
+If the CSV is for updating UI elements, please check the checkbox below. This will prevent the app from updating the Localizable.strings files and go directly to the other .strings files.
