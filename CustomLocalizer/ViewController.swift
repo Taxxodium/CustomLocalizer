@@ -36,51 +36,14 @@ class ViewController: NSViewController, LanguagesPickerViewControllerDelegate {
     }
 
     @IBAction func selectFiles(_ sender: Any) {
+        
         self.chooseFilesOfType(.project)
     }
     
     // MARK: -
     
     @IBAction func localizeFiles(_ sender: Any) {
-        if self.urlToProject == nil {
-            self.showAlert(title: "Project folder not selected", message: "Please select the folder for your project")
-            return
-        }
-        
-        if self.urlToCSV == nil {
-            self.showAlert(title: NSLocalizedString("CSV file not selected!", comment: ""), message: NSLocalizedString("Please select the CSV file containing the strings to be localized!", comment: ""))
-            return
-        }
-        
-        guard let csvStream = InputStream(url: self.urlToCSV) else {
-            self.showAlert(title: "Could not read the CSV file", message: "Please make sure the CSV file  is in the correct format.")
-            return
-        }
-        
-        guard let csv = try? CSVReader(stream: csvStream, hasHeaderRow: true) else {
-            self.showAlert(title: "Could not read the CSV file", message: "Please make sure the CSV file  is in the correct format.")
-            return
-        }
-        
-        guard let csvHeaders = csv.headerRow else {
-            self.showAlert(title: "Wrong format for CSV", message: "Please make sure the CSV file is in the correct format.")
-            return
-        }
-            
-        while let csvRow = csv.next() {
-            for (index, value) in csvRow.enumerated() {
-                var stringValues = [String]()
-                let key = csvHeaders[index]
-                
-                if let list = self.stringsInfo[key] {
-                    stringValues.append(contentsOf: list)
-                }
-                
-                stringValues.append(value)
-                
-                self.stringsInfo[key] = stringValues
-            }
-        }
+        self.updateStringsFromCSV()
         
         self.performSegue(withIdentifier: "showLanguages", sender: nil)
     }
@@ -271,6 +234,125 @@ class ViewController: NSViewController, LanguagesPickerViewControllerDelegate {
         }
         
         print(log)
+    }
+    
+    // MARK: -
+    
+    @IBAction func preflight(_ sender: Any) {
+        if !self.updateStringsFromCSV() {
+            return
+        }
+        
+        let lprojURLs = self.findLocalizedProjectURLs(fromURL: self.urlToProject)
+        
+        if lprojURLs.count == 0 {
+            print("Project has no localizations!")
+            return
+        }
+        
+        guard let stringsRegEx = try? NSRegularExpression(pattern: "\"([^\"]*)\"\\s*=\\s*\"([^\"]*)\";", options: []) else {
+            print("Incorrect regular expression")
+            return
+        }
+        
+        var unmatchedKeys = [String]()
+        
+        // go over all lproj folders, which contain the .strings files
+        for lprojURL in lprojURLs {
+            if !lprojURL.lastPathComponent.hasPrefix("en") {
+                continue
+            }
+            
+            let fileURL = lprojURL.appendingPathComponent("Localizable.strings")
+            
+            guard let fileContents = try? String(contentsOf: fileURL, encoding: .utf8) else {
+                continue
+            }
+            
+            let fileContentsRange = NSMakeRange(0, fileContents.distance(from: fileContents.startIndex, to: fileContents.endIndex))
+            
+            let keysInCSV = self.stringsInfo["en"]!
+            var currentKeys = [String]()
+            
+            let matches = stringsRegEx.matches(in: fileContents, options: [], range: fileContentsRange)
+            
+            for match in matches {
+                if match.numberOfRanges <= 2 {
+                    continue
+                }
+                
+                let keyRange = match.rangeAt(1)
+                //let valueRange = match.rangeAt(2)
+                
+                let key = (fileContents as NSString).substring(with: keyRange)
+                //let value = (fileContents as NSString).substring(with: valueRange)
+                
+                currentKeys.append(key)
+            }
+            
+            for key in keysInCSV {
+                if !currentKeys.contains(key) {
+                    unmatchedKeys.append(key)
+                }
+            }
+        }
+        
+        var c = ""
+        
+        c += "THE FOLLOWING KEYS WERE NOT FOUND IN Localizable.strings FILE:\n\n"
+        
+        c += unmatchedKeys.joined(separator: "\n")
+        
+        self.performSegue(withIdentifier: "showConsole", sender: c)
+    }
+    
+    
+    // MARK: -
+    
+    fileprivate func updateStringsFromCSV() -> Bool {
+        if self.urlToProject == nil {
+            self.showAlert(title: "Project folder not selected", message: "Please select the folder for your project")
+            return false
+        }
+        
+        if self.urlToCSV == nil {
+            self.showAlert(title: NSLocalizedString("CSV file not selected!", comment: ""), message: NSLocalizedString("Please select the CSV file containing the strings to be localized!", comment: ""))
+            return false
+        }
+        
+        guard let csvStream = InputStream(url: self.urlToCSV) else {
+            self.showAlert(title: "Could not read the CSV file", message: "Please make sure the CSV file  is in the correct format.")
+            return false
+        }
+        
+        guard let csv = try? CSVReader(stream: csvStream, hasHeaderRow: true) else {
+            self.showAlert(title: "Could not read the CSV file", message: "Please make sure the CSV file  is in the correct format.")
+            return false
+        }
+        
+        guard let csvHeaders = csv.headerRow else {
+            self.showAlert(title: "Wrong format for CSV", message: "Please make sure the CSV file is in the correct format.")
+            return false
+        }
+        
+        self.stringsInfo.removeAll()
+        
+        while let csvRow = csv.next() {
+            for (index, value) in csvRow.enumerated() {
+                var stringValues = [String]()
+                let key = csvHeaders[index].lowercased()
+                
+                if let list = self.stringsInfo[key] {
+                    stringValues.append(contentsOf: list)
+                }
+                
+                stringValues.append(value)
+                
+                self.stringsInfo[key] = stringValues
+            }
+        }
+        
+        return true
     }
     
     // MARK: -
@@ -622,7 +704,10 @@ class ViewController: NSViewController, LanguagesPickerViewControllerDelegate {
             }.sorted {
                 return $0 < $1
             }
+        case "showConsole":
+            let controller = segue.destinationController as! ConsoleViewController
             
+            controller.contents = sender as? String
         default:
             break
         }

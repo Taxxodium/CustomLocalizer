@@ -222,11 +222,11 @@
                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
                             </textField>
-                            <stackView distribution="fillEqually" orientation="horizontal" alignment="centerY" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="u11-lr-xH3">
-                                <rect key="frame" x="29" y="20" width="421" height="21"/>
+                            <stackView distribution="fillProportionally" orientation="horizontal" alignment="centerY" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="u11-lr-xH3">
+                                <rect key="frame" x="22" y="20" width="435" height="21"/>
                                 <subviews>
                                     <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="BMe-sS-den">
-                                        <rect key="frame" x="-6" y="-7" width="147" height="32"/>
+                                        <rect key="frame" x="-6" y="-7" width="130" height="32"/>
                                         <buttonCell key="cell" type="push" title="Extract Strings" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Yq8-sS-A2M">
                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                             <font key="font" metaFont="system"/>
@@ -236,7 +236,7 @@
                                         </connections>
                                     </button>
                                     <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="iNm-4b-7Qo">
-                                        <rect key="frame" x="137" y="-7" width="147" height="32"/>
+                                        <rect key="frame" x="120" y="-7" width="90" height="32"/>
                                         <buttonCell key="cell" type="push" title="Localize" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="gQX-tZ-S63">
                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                             <font key="font" metaFont="system"/>
@@ -246,7 +246,7 @@
                                         </connections>
                                     </button>
                                     <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="y6A-Bd-gMh">
-                                        <rect key="frame" x="280" y="-7" width="147" height="32"/>
+                                        <rect key="frame" x="206" y="-7" width="147" height="32"/>
                                         <buttonCell key="cell" type="push" title="Detect duplicates" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="iBD-4A-dc1">
                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                             <font key="font" metaFont="system"/>
@@ -255,13 +255,25 @@
                                             <action selector="detectDuplicates:" target="XfG-lQ-9wD" id="gE4-l0-4M2"/>
                                         </connections>
                                     </button>
+                                    <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="SRf-en-NJl">
+                                        <rect key="frame" x="349" y="-7" width="92" height="32"/>
+                                        <buttonCell key="cell" type="push" title="Preflight" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="iTt-7e-HqH">
+                                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                            <font key="font" metaFont="system"/>
+                                        </buttonCell>
+                                        <connections>
+                                            <action selector="preflight:" target="XfG-lQ-9wD" id="HNC-VC-ZiL"/>
+                                        </connections>
+                                    </button>
                                 </subviews>
                                 <visibilityPriorities>
                                     <integer value="1000"/>
                                     <integer value="1000"/>
                                     <integer value="1000"/>
+                                    <integer value="1000"/>
                                 </visibilityPriorities>
                                 <customSpacing>
+                                    <real value="3.4028234663852886e+38"/>
                                     <real value="3.4028234663852886e+38"/>
                                     <real value="3.4028234663852886e+38"/>
                                     <real value="3.4028234663852886e+38"/>
@@ -312,11 +324,80 @@
                         <outlet property="isUIButton" destination="VkS-kH-072" id="576-yd-l2D"/>
                         <segue destination="uad-9N-w1u" kind="sheet" identifier="showLog" id="AJ1-OH-eKT"/>
                         <segue destination="wYp-As-EyW" kind="sheet" identifier="showLanguages" id="Cu0-BD-8Zs"/>
+                        <segue destination="AdX-qx-dax" kind="sheet" identifier="showConsole" id="0d5-fF-fai"/>
                     </connections>
                 </viewController>
                 <customObject id="rPt-NT-nkU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="75" y="655"/>
+            <point key="canvasLocation" x="46" y="690"/>
+        </scene>
+        <!--Console View Controller-->
+        <scene sceneID="FYZ-5Z-c6S">
+            <objects>
+                <viewController id="AdX-qx-dax" customClass="ConsoleViewController" customModule="CustomLocalizer" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" id="tWq-Kl-2O4">
+                        <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="LNY-V3-hH9">
+                                <rect key="frame" x="364" y="13" width="72" height="32"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="60" id="llo-k7-LzM"/>
+                                </constraints>
+                                <buttonCell key="cell" type="push" title="OK" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="ti5-cI-T0l">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                    <string key="keyEquivalent" base64-UTF8="YES">
+DQ
+</string>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="handleOK:" target="AdX-qx-dax" id="EMY-Gu-3ZM"/>
+                                </connections>
+                            </button>
+                            <scrollView horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Ahq-oH-bc2">
+                                <rect key="frame" x="20" y="61" width="410" height="219"/>
+                                <clipView key="contentView" id="TQz-3e-Xh4">
+                                    <rect key="frame" x="1" y="1" width="408" height="217"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                    <subviews>
+                                        <textView importsGraphics="NO" usesFontPanel="YES" findStyle="panel" continuousSpellChecking="YES" allowsUndo="YES" usesRuler="YES" allowsNonContiguousLayout="YES" quoteSubstitution="YES" dashSubstitution="YES" smartInsertDelete="YES" id="D1K-T8-1Xc">
+                                            <rect key="frame" x="0.0" y="0.0" width="408" height="217"/>
+                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                            <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                            <size key="minSize" width="408" height="217"/>
+                                            <size key="maxSize" width="463" height="10000000"/>
+                                            <color key="insertionPointColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                        </textView>
+                                    </subviews>
+                                    <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                </clipView>
+                                <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="YES" id="Al9-Bl-Hjs">
+                                    <rect key="frame" x="-100" y="-100" width="87" height="18"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </scroller>
+                                <scroller key="verticalScroller" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="Ifl-Kc-Ir9">
+                                    <rect key="frame" x="393" y="1" width="16" height="217"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </scroller>
+                            </scrollView>
+                        </subviews>
+                        <constraints>
+                            <constraint firstAttribute="trailing" secondItem="Ahq-oH-bc2" secondAttribute="trailing" constant="20" id="4Ro-qm-FuD"/>
+                            <constraint firstItem="Ahq-oH-bc2" firstAttribute="top" secondItem="tWq-Kl-2O4" secondAttribute="top" constant="20" id="EEy-7o-af6"/>
+                            <constraint firstAttribute="bottom" secondItem="LNY-V3-hH9" secondAttribute="bottom" constant="20" id="FQh-8B-Sbd"/>
+                            <constraint firstAttribute="trailing" secondItem="LNY-V3-hH9" secondAttribute="trailing" constant="20" id="R6B-12-ATI"/>
+                            <constraint firstItem="Ahq-oH-bc2" firstAttribute="leading" secondItem="tWq-Kl-2O4" secondAttribute="leading" constant="20" id="fKO-QL-blS"/>
+                            <constraint firstItem="LNY-V3-hH9" firstAttribute="top" secondItem="Ahq-oH-bc2" secondAttribute="bottom" constant="20" id="qE3-vT-coV"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="textView" destination="D1K-T8-1Xc" id="Gw8-BK-Z5F"/>
+                    </connections>
+                </viewController>
+                <customObject id="uBv-m3-d3c" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-482" y="867"/>
         </scene>
         <!--Languages Picker View Controller-->
         <scene sceneID="owG-QS-5Kz">
@@ -443,7 +524,7 @@ Gw
                 </viewController>
                 <customObject id="4wW-J0-fml" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-22" y="1074"/>
+            <point key="canvasLocation" x="67" y="1214"/>
         </scene>
         <!--Help View Controller-->
         <scene sceneID="pig-eJ-JdW">
