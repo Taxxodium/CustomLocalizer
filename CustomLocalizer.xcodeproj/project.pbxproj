@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		860936161F8D700700246AFC /* LanguagesPickerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 860936151F8D700700246AFC /* LanguagesPickerViewController.swift */; };
 		8618807B1F2F985500B28101 /* CSVHelpViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 861880791F2F985500B28101 /* CSVHelpViewController.swift */; };
 		8618807E1F2F989900B28101 /* CSVHelp.txt in Resources */ = {isa = PBXBuildFile; fileRef = 8618807D1F2F989900B28101 /* CSVHelp.txt */; };
 		863ACD891F0EC9F700DEF0CF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 863ACD881F0EC9F700DEF0CF /* AppDelegate.swift */; };
@@ -19,6 +20,7 @@
 
 /* Begin PBXFileReference section */
 		738A34F437C4DF23A2F33766 /* Pods-CustomLocalizer.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CustomLocalizer.debug.xcconfig"; path = "Pods/Target Support Files/Pods-CustomLocalizer/Pods-CustomLocalizer.debug.xcconfig"; sourceTree = "<group>"; };
+		860936151F8D700700246AFC /* LanguagesPickerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LanguagesPickerViewController.swift; sourceTree = "<group>"; };
 		861880791F2F985500B28101 /* CSVHelpViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CSVHelpViewController.swift; sourceTree = "<group>"; };
 		8618807D1F2F989900B28101 /* CSVHelp.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CSVHelp.txt; sourceTree = "<group>"; };
 		863ACD851F0EC9F700DEF0CF /* CustomLocalizer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CustomLocalizer.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -69,6 +71,7 @@
 				863ACD8A1F0EC9F700DEF0CF /* ViewController.swift */,
 				863ACD8C1F0EC9F700DEF0CF /* Assets.xcassets */,
 				863ACD8E1F0EC9F700DEF0CF /* Main.storyboard */,
+				860936151F8D700700246AFC /* LanguagesPickerViewController.swift */,
 				861880791F2F985500B28101 /* CSVHelpViewController.swift */,
 				8618807D1F2F989900B28101 /* CSVHelp.txt */,
 				86596D681F200C3E00E48C12 /* LogViewController.swift */,
@@ -222,6 +225,7 @@
 				863ACD8B1F0EC9F700DEF0CF /* ViewController.swift in Sources */,
 				8618807B1F2F985500B28101 /* CSVHelpViewController.swift in Sources */,
 				863ACD891F0EC9F700DEF0CF /* AppDelegate.swift in Sources */,
+				860936161F8D700700246AFC /* LanguagesPickerViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

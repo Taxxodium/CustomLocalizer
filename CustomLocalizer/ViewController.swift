@@ -14,7 +14,7 @@ fileprivate enum Type: Int {
     case project
 }
 
-class ViewController: NSViewController {
+class ViewController: NSViewController, LanguagesPickerViewControllerDelegate {
 
     @IBOutlet weak var isUIButton: NSButton!
     
@@ -22,6 +22,8 @@ class ViewController: NSViewController {
     var urlToProject: URL!
     
     var stringsInfo = [String: [String]]()
+    
+    var filteredLanguages = [String]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -80,11 +82,7 @@ class ViewController: NSViewController {
             }
         }
         
-        if self.isUIButton.state == NSOnState {
-            self.localizeStringsForUI(rootURL: self.urlToProject)
-        } else {
-            self.localizeStrings(rootURL: self.urlToProject)
-        }
+        self.performSegue(withIdentifier: "showLanguages", sender: nil)
     }
     
     // MARK: -
@@ -289,6 +287,10 @@ class ViewController: NSViewController {
                 continue
             }
             
+            if !self.filteredLanguages.contains(languageCode) {
+                continue
+            }
+            
             let locDirectory = self.getLocalizedProjectURL(fromURL: rootURL, languageCode: languageCode)
             
             let fileManager = FileManager.default
@@ -403,6 +405,10 @@ class ViewController: NSViewController {
     
     fileprivate func localizeStrings(rootURL: URL) {
         for (languageCode, languageStrings) in self.stringsInfo {
+            if !self.filteredLanguages.contains(languageCode) {
+                continue
+            }
+            
             let stringsFileContents = self.getLocalizationContents(fromURL: rootURL, languageCode: languageCode)
             
             if let newStrings = self.updateLocalizationFile(content: stringsFileContents, languages: languageStrings) {
@@ -501,7 +507,7 @@ class ViewController: NSViewController {
         let fileManager = FileManager.default
         let resourceKeys: Set<URLResourceKey> = [.nameKey, .isDirectoryKey]
         
-        guard let directoryEnumerator = fileManager.enumerator(at: fromURL, includingPropertiesForKeys: Array(resourceKeys), options: [.skipsHiddenFiles, .skipsPackageDescendants], errorHandler: nil) else {
+        guard let directoryEnumerator = fileManager.enumerator(at: fromURL, includingPropertiesForKeys: Array(resourceKeys), options: [.skipsHiddenFiles, .skipsPackageDescendants, .skipsSubdirectoryDescendants], errorHandler: nil) else {
             print("Could not create enumerator")
             return urls
         }
@@ -607,8 +613,31 @@ class ViewController: NSViewController {
             let controller = segue.destinationController as! LogViewController
             
             controller.duplicates = sender as! [String: [String]]
+        case "showLanguages":
+            let controller = segue.destinationController as! LanguagesPickerViewController
+            
+            controller.delegate = self
+            controller.languages = self.findLocalizedProjectURLs(fromURL: self.urlToProject).map {
+                $0.lastPathComponent
+            }.sorted {
+                return $0 < $1
+            }
+            
         default:
             break
+        }
+    }
+    
+    // MARK: -
+    
+    func languagesPickerViewController(controller: LanguagesPickerViewController, didSelectLanguages languages: [String]) {
+        
+        self.filteredLanguages = languages.map { $0.components(separatedBy: ".").first! }
+        
+        if self.isUIButton.state == NSOnState {
+            self.localizeStringsForUI(rootURL: self.urlToProject)
+        } else {
+            self.localizeStrings(rootURL: self.urlToProject)
         }
     }
 }
