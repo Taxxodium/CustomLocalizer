@@ -17,6 +17,7 @@ fileprivate enum Type: Int {
 class ViewController: NSViewController, LanguagesPickerViewControllerDelegate {
 
     @IBOutlet weak var isUIButton: NSButton!
+    @IBOutlet weak var isKeyed: NSButton!
     
     var urlToCSV: URL!
     var urlToProject: URL!
@@ -43,7 +44,9 @@ class ViewController: NSViewController, LanguagesPickerViewControllerDelegate {
     // MARK: -
     
     @IBAction func localizeFiles(_ sender: Any) {
-        self.updateStringsFromCSV()
+        if !self.updateStringsFromCSV() {
+            return
+        }
         
         self.performSegue(withIdentifier: "showLanguages", sender: nil)
     }
@@ -342,6 +345,10 @@ class ViewController: NSViewController, LanguagesPickerViewControllerDelegate {
                 var stringValues = [String]()
                 let key = csvHeaders[index].lowercased()
                 
+                if key.isEmpty {
+                    continue
+                }
+                
                 if let list = self.stringsInfo[key] {
                     stringValues.append(contentsOf: list)
                 }
@@ -486,16 +493,67 @@ class ViewController: NSViewController, LanguagesPickerViewControllerDelegate {
     // MARK: -
     
     fileprivate func localizeStrings(rootURL: URL) {
-        for (languageCode, languageStrings) in self.stringsInfo {
-            if !self.filteredLanguages.contains(languageCode) {
-                continue
+        let isKeyed = self.isKeyed.state == NSOnState
+        
+        if isKeyed {
+            guard let stringsRegEx = try? NSRegularExpression(pattern: "\"([^\"]*)\"\\s*=\\s*\"([^\"]*)\";", options: []) else {
+                print("Incorrect regular expression")
+                return
             }
             
-            let stringsFileContents = self.getLocalizationContents(fromURL: rootURL, languageCode: languageCode)
+            guard let keysValues = self.stringsInfo["key"] else {
+                print("No key column found")
+                return
+            }
             
-            if let newStrings = self.updateLocalizationFile(content: stringsFileContents, languages: languageStrings) {
-                if let data = newStrings.data(using: .utf8) {
-                    let urlToWrite = self.getLocalizableStringsURL(fromURL: rootURL, languageCode: languageCode)
+            for (languageCode, strings) in self.stringsInfo {
+                if languageCode == "key" {
+                    continue
+                }
+                
+                if !self.filteredLanguages.contains(languageCode) {
+                    continue
+                }
+                
+                let fileContents = self.getContentsOfLocalizableStringsFile(fromURL: rootURL, languageCode: languageCode)
+                var newFileContents = fileContents
+                
+                let fileContentsRange = NSMakeRange(0, fileContents.distance(from: fileContents.startIndex, to: fileContents.endIndex))
+                
+                let matches = stringsRegEx.matches(in: fileContents, options: [], range: fileContentsRange)
+                
+                for match in matches {
+                    if match.numberOfRanges <= 2 {
+                        continue
+                    }
+                    
+                    let fullRange = match.rangeAt(0)
+                    let keyRange = match.rangeAt(1)
+                    //let valueRange = match.rangeAt(2)
+                    
+                    let full = (fileContents as NSString).substring(with: fullRange)
+                    let key = (fileContents as NSString).substring(with: keyRange)
+                    //let value = (fileContents as NSString).substring(with: valueRange)
+                    
+                    for (index, k) in keysValues.enumerated() {
+                        if k == key {
+                            let newValue = strings[index]
+                        
+                            let range = (newFileContents as NSString).range(of: full)
+                        
+                            if range.location != NSNotFound {
+                                newFileContents = (newFileContents as NSString).replacingCharacters(in: range, with: "\"\(key)\" = \"\(newValue)\";")
+                            }
+                            
+                            //newFileContents = (fileContents as NSString).replacingCharacters(in: fullRange, with: "\"\(key)\" = \"\(newValue)\";\n")
+                            
+                            break
+                        }
+                    }
+                }
+                
+                if let data = newFileContents.data(using: .utf8) {
+                    let urlToWrite = self.getURLToLocalizableStrigsFile(fromURL: rootURL, languageCode: languageCode)
                     
                     do {
                         try data.write(to: urlToWrite, options: .atomic)
@@ -504,13 +562,35 @@ class ViewController: NSViewController, LanguagesPickerViewControllerDelegate {
                     }
                 }
             }
+        } else {
+            for (languageCode, languageStrings) in self.stringsInfo {
+                if !self.filteredLanguages.contains(languageCode) {
+                    continue
+                }
+                
+                let stringsFileContents = self.getContentsOfLocalizableStringsFile(fromURL: rootURL, languageCode: languageCode)
+                
+                if let newStringsFile = self.updateLocalizableStringsFile(content: stringsFileContents, languages: languageStrings) {
+                    if let data = newStringsFile.data(using: .utf8) {
+                        let urlToWrite = self.getURLToLocalizableStrigsFile(fromURL: rootURL, languageCode: languageCode)
+                        
+                        do {
+                            try data.write(to: urlToWrite, options: .atomic)
+                        } catch let error {
+                            print("Could not write file: \(error)")
+                        }
+                    }
+                }
+            }
         }
     }
 
-    fileprivate func getLocalizationContents(fromURL: URL, languageCode: String) -> String {
+    // MARK: -
+    
+    fileprivate func getContentsOfLocalizableStringsFile(fromURL: URL, languageCode: String) -> String {
         var result = ""
         
-        let url = self.getLocalizableStringsURL(fromURL: fromURL, languageCode: languageCode)
+        let url = self.getURLToLocalizableStrigsFile(fromURL: fromURL, languageCode: languageCode)
         
         let fileManager = FileManager.default
         
@@ -523,7 +603,7 @@ class ViewController: NSViewController, LanguagesPickerViewControllerDelegate {
         return result
     }
     
-    fileprivate func updateLocalizationFile(content: String, languages: [String]) -> String? {
+    fileprivate func updateLocalizableStringsFile(content: String, languages: [String]) -> String? {
         guard let englishStrings = self.stringsInfo["en"] else {
             print("Could not find english strings")
             return nil
@@ -539,10 +619,9 @@ class ViewController: NSViewController, LanguagesPickerViewControllerDelegate {
         }
         
         var newBlock = ""
+        var allOK = true
         
         newBlock += "\n// new localizations\n\n"
-        
-        var allOK = true
         
         for (stringsIndex, stringsValue) in languages.enumerated() {
             if stringsIndex > englishStrings.count {
@@ -634,7 +713,7 @@ class ViewController: NSViewController, LanguagesPickerViewControllerDelegate {
     
     // MARK: -
     
-    fileprivate func getLocalizableStringsURL(fromURL: URL, languageCode: String) -> URL {
+    fileprivate func getURLToLocalizableStrigsFile(fromURL: URL, languageCode: String) -> URL {
         return fromURL.appendingPathComponent("\(languageCode.lowercased()).lproj/Localizable.strings")
     }
     

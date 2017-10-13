@@ -296,10 +296,18 @@
                                     <segue destination="ivF-S8-9mC" kind="popover" identifier="showCSVHelp" popoverAnchorView="FAi-cm-Wul" popoverBehavior="t" preferredEdge="maxY" id="U4y-EQ-raT"/>
                                 </connections>
                             </button>
+                            <button translatesAutoresizingMaskIntoConstraints="NO" id="Hvf-WN-IAs">
+                                <rect key="frame" x="138" y="134" width="125" height="18"/>
+                                <buttonCell key="cell" type="check" title="Has 'key' column" bezelStyle="regularSquare" imagePosition="left" inset="2" id="2jw-uz-L9F">
+                                    <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                            </button>
                         </subviews>
                         <constraints>
                             <constraint firstItem="VkS-kH-072" firstAttribute="top" secondItem="CRb-Oy-By5" secondAttribute="bottom" constant="8" id="0cr-UC-sLv"/>
                             <constraint firstItem="FAi-cm-Wul" firstAttribute="centerY" secondItem="CRb-Oy-By5" secondAttribute="centerY" id="2cb-Me-d1j"/>
+                            <constraint firstItem="VkS-kH-072" firstAttribute="leading" secondItem="Hvf-WN-IAs" secondAttribute="leading" id="4ff-lE-yJR"/>
                             <constraint firstItem="Z2l-8i-WIF" firstAttribute="leading" secondItem="r43-Ub-4fN" secondAttribute="trailing" constant="20" id="MWN-vr-kaX"/>
                             <constraint firstItem="r43-Ub-4fN" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" constant="20" id="NJ4-cF-H4y"/>
                             <constraint firstItem="VkS-kH-072" firstAttribute="leading" secondItem="CRb-Oy-By5" secondAttribute="leading" id="PGY-va-IaR"/>
@@ -311,8 +319,9 @@
                             <constraint firstItem="Z2l-8i-WIF" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" constant="20" id="UXw-Eb-bBL"/>
                             <constraint firstItem="u11-lr-xH3" firstAttribute="centerX" secondItem="m2S-Jp-Qdl" secondAttribute="centerX" id="WOv-ed-NDX"/>
                             <constraint firstItem="u11-lr-xH3" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="m2S-Jp-Qdl" secondAttribute="leading" constant="20" id="cSY-ch-fvN"/>
-                            <constraint firstItem="u11-lr-xH3" firstAttribute="top" relation="greaterThanOrEqual" secondItem="VkS-kH-072" secondAttribute="bottom" constant="20" id="dB7-1m-2Kr"/>
                             <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="VkS-kH-072" secondAttribute="trailing" constant="20" id="e03-tm-Xri"/>
+                            <constraint firstItem="Hvf-WN-IAs" firstAttribute="top" secondItem="VkS-kH-072" secondAttribute="bottom" constant="16" id="k2r-3t-1DR"/>
+                            <constraint firstItem="u11-lr-xH3" firstAttribute="top" relation="greaterThanOrEqual" secondItem="Hvf-WN-IAs" secondAttribute="bottom" constant="20" id="kQI-8U-DBl"/>
                             <constraint firstItem="FAi-cm-Wul" firstAttribute="leading" secondItem="CRb-Oy-By5" secondAttribute="trailing" constant="20" id="syq-ls-NBb"/>
                             <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="CRb-Oy-By5" secondAttribute="trailing" constant="20" id="uI7-Uf-tnZ"/>
                             <constraint firstItem="CRb-Oy-By5" firstAttribute="leading" secondItem="BDC-E3-Ye3" secondAttribute="trailing" constant="20" id="uTr-9Q-MsG"/>
@@ -321,6 +330,7 @@
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="isKeyed" destination="Hvf-WN-IAs" id="AuJ-5p-Mqc"/>
                         <outlet property="isUIButton" destination="VkS-kH-072" id="576-yd-l2D"/>
                         <segue destination="uad-9N-w1u" kind="sheet" identifier="showLog" id="AJ1-OH-eKT"/>
                         <segue destination="wYp-As-EyW" kind="sheet" identifier="showLanguages" id="Cu0-BD-8Zs"/>
@@ -410,7 +420,7 @@ DQ
                             <scrollView autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="lQ0-t3-GtZ">
                                 <rect key="frame" x="0.0" y="61" width="450" height="219"/>
                                 <clipView key="contentView" id="Uq8-fd-CCt">
-                                    <rect key="frame" x="1" y="23" width="448" height="195"/>
+                                    <rect key="frame" x="1" y="0.0" width="448" height="218"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" columnSelection="YES" multipleSelection="NO" autosaveColumns="NO" rowSizeStyle="automatic" headerView="ZeX-iO-Xgg" viewBased="YES" id="ZZC-nr-bWP">
