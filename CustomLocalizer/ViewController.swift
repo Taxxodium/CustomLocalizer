@@ -343,7 +343,7 @@ class ViewController: NSViewController, LanguagesPickerViewControllerDelegate {
         while let csvRow = csv.next() {
             for (index, value) in csvRow.enumerated() {
                 var stringValues = [String]()
-                let key = csvHeaders[index].lowercased()
+                let key = csvHeaders[index]//.lowercased()
                 
                 if key.isEmpty {
                     continue
