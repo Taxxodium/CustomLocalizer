@@ -539,13 +539,13 @@ class ViewController: NSViewController, LanguagesPickerViewControllerDelegate {
                         if k == key {
                             let newValue = strings[index]
                         
-                            let range = (newFileContents as NSString).range(of: full)
-                        
-                            if range.location != NSNotFound {
-                                newFileContents = (newFileContents as NSString).replacingCharacters(in: range, with: "\"\(key)\" = \"\(newValue)\";")
+                            if !newValue.isEmpty {
+                                let range = (newFileContents as NSString).range(of: full)
+                                
+                                if range.location != NSNotFound {
+                                    newFileContents = (newFileContents as NSString).replacingCharacters(in: range, with: "\"\(key)\" = \"\(newValue)\";")
+                                }
                             }
-                            
-                            //newFileContents = (fileContents as NSString).replacingCharacters(in: fullRange, with: "\"\(key)\" = \"\(newValue)\";\n")
                             
                             break
                         }
