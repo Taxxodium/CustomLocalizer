@@ -16,6 +16,7 @@ fileprivate enum Type: Int {
 
 class ViewController: NSViewController, LanguagesPickerViewControllerDelegate {
 
+    @IBOutlet weak var loadingIndicator: NSProgressIndicator!
     @IBOutlet weak var isUIButton: NSButton!
     @IBOutlet weak var isKeyed: NSButton!
     
@@ -71,6 +72,8 @@ class ViewController: NSViewController, LanguagesPickerViewControllerDelegate {
             return
         }
         
+        self.loadingIndicator.startAnimation(self)
+        
         var duplicatesPerLanguage = [String: Array<String>]()
         
         var log = ""
@@ -125,6 +128,8 @@ class ViewController: NSViewController, LanguagesPickerViewControllerDelegate {
             }
         }
         
+        self.loadingIndicator.stopAnimation(self)
+        
         self.performSegue(withIdentifier: "showLog", sender: duplicatesPerLanguage)
     }
     
@@ -135,6 +140,8 @@ class ViewController: NSViewController, LanguagesPickerViewControllerDelegate {
             self.showAlert(title: "Project folder not selected", message: "Please select the folder for your project")
             return
         }
+        
+        self.loadingIndicator.startAnimation(self)
         
         var log = ""
         
@@ -236,7 +243,11 @@ class ViewController: NSViewController, LanguagesPickerViewControllerDelegate {
             log += "\n"
         }
         
-        print(log)
+        self.loadingIndicator.stopAnimation(self)
+        
+        self.performSegue(withIdentifier: "showConsole", sender: log)
+        
+        //print(log)
     }
     
     // MARK: -
@@ -257,6 +268,8 @@ class ViewController: NSViewController, LanguagesPickerViewControllerDelegate {
             print("Incorrect regular expression")
             return
         }
+        
+        self.loadingIndicator.startAnimation(self)
         
         var unmatchedKeys = [String]()
         
@@ -299,6 +312,8 @@ class ViewController: NSViewController, LanguagesPickerViewControllerDelegate {
                 }
             }
         }
+        
+        self.loadingIndicator.stopAnimation(self)
         
         var c = ""
         
@@ -506,6 +521,8 @@ class ViewController: NSViewController, LanguagesPickerViewControllerDelegate {
                 return
             }
             
+            self.loadingIndicator.startAnimation(self)
+
             for (languageCode, strings) in self.stringsInfo {
                 if languageCode == "key" {
                     continue
@@ -517,25 +534,29 @@ class ViewController: NSViewController, LanguagesPickerViewControllerDelegate {
                 
                 let fileContents = self.getContentsOfLocalizableStringsFile(fromURL: rootURL, languageCode: languageCode)
                 var newFileContents = fileContents
+                var orphanStrings = ""
                 
                 let fileContentsRange = NSMakeRange(0, fileContents.distance(from: fileContents.startIndex, to: fileContents.endIndex))
                 
                 let matches = stringsRegEx.matches(in: fileContents, options: [], range: fileContentsRange)
+                
+                var localizableStringsInfo = [String: String]()
                 
                 for match in matches {
                     if match.numberOfRanges <= 2 {
                         continue
                     }
                     
-                    let fullRange = match.rangeAt(0)
+                    //let fullRange = match.rangeAt(0)
                     let keyRange = match.rangeAt(1)
-                    //let valueRange = match.rangeAt(2)
+                    let valueRange = match.rangeAt(2)
                     
-                    let full = (fileContents as NSString).substring(with: fullRange)
+                    //let full = (fileContents as NSString).substring(with: fullRange)
                     let key = (fileContents as NSString).substring(with: keyRange)
-                    //let value = (fileContents as NSString).substring(with: valueRange)
+                    let value = (fileContents as NSString).substring(with: valueRange)
                     
-                    for (index, k) in keysValues.enumerated() {
+                    localizableStringsInfo[key] = value
+                    /*for (index, k) in keysValues.enumerated() {
                         if k == key {
                             let newValue = strings[index]
                         
@@ -549,8 +570,37 @@ class ViewController: NSViewController, LanguagesPickerViewControllerDelegate {
                             
                             break
                         }
+                    }*/
+                }
+                
+                for (index, key) in keysValues.enumerated() {
+                    let newValue = strings[index]
+                    
+                    if newValue.isEmpty {
+                        continue
+                    }
+                    
+                    let formattedString = "\"\(key)\" = \"\(newValue)\";"
+                    
+                    if let oldValue = localizableStringsInfo[key] {
+                        //localizableStringsInfo[key] = newValue
+                        //newFileContents += "\"\(key)\" = \"\(newValue)\";\n"
+                        let formattedString = "\"\(key)\" = \"\(oldValue)\";"
+                        
+                        let range = (newFileContents as NSString).range(of: formattedString)
+                        
+                        if range.location != NSNotFound {
+                            newFileContents = (newFileContents as NSString).replacingCharacters(in: range, with: "\"\(key)\" = \"\(newValue)\";")
+                        }
+                    } else {
+                        if !key.isEmpty {
+                            orphanStrings += "\(formattedString)\n"
+                        }
                     }
                 }
+                
+                newFileContents += "\n\n/* -- new strings -- */\n\n"
+                newFileContents += orphanStrings
                 
                 if let data = newFileContents.data(using: .utf8) {
                     let urlToWrite = self.getURLToLocalizableStrigsFile(fromURL: rootURL, languageCode: languageCode)
@@ -563,6 +613,8 @@ class ViewController: NSViewController, LanguagesPickerViewControllerDelegate {
                 }
             }
         } else {
+            self.loadingIndicator.startAnimation(self)
+            
             for (languageCode, languageStrings) in self.stringsInfo {
                 if !self.filteredLanguages.contains(languageCode) {
                     continue
@@ -583,6 +635,8 @@ class ViewController: NSViewController, LanguagesPickerViewControllerDelegate {
                 }
             }
         }
+        
+        self.loadingIndicator.stopAnimation(self)
     }
 
     // MARK: -
