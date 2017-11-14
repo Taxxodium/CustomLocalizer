@@ -155,6 +155,11 @@ class ViewController: NSViewController, LanguagesPickerViewControllerDelegate {
             return
         }
         
+        guard let swiftStringsRegEx = try? NSRegularExpression(pattern: "\"(?:[^\"\\\\]|\\\\.)*\"", options: []) else {
+            print("Incorrect regular expression")
+            return
+        }
+        
         let fileManager = FileManager.default
         
         guard let fileEnum = fileManager.enumerator(at: self.urlToProject, includingPropertiesForKeys: nil) else {
@@ -162,7 +167,7 @@ class ViewController: NSViewController, LanguagesPickerViewControllerDelegate {
         }
         
         while let fileURL = fileEnum.nextObject() as? URL {
-            if !["m", "h"].contains(fileURL.pathExtension) {
+            if !["m", "h", "swift"].contains(fileURL.pathExtension) {
                 continue
             }
             
@@ -170,7 +175,13 @@ class ViewController: NSViewController, LanguagesPickerViewControllerDelegate {
                 continue
             }
             
-            let matches = objcStringsRegEx.matches(in: fileContents, options: [], range: NSMakeRange(0, fileContents.distance(from: fileContents.startIndex, to: fileContents.endIndex)))
+            var theRegEx = objcStringsRegEx
+            
+            if fileURL.pathExtension == "swift" {
+                theRegEx = swiftStringsRegEx
+            }
+            
+            let matches = theRegEx.matches(in: fileContents, options: [], range: NSMakeRange(0, fileContents.distance(from: fileContents.startIndex, to: fileContents.endIndex)))
             
             if matches.count == 0 {
                 continue
@@ -324,6 +335,65 @@ class ViewController: NSViewController, LanguagesPickerViewControllerDelegate {
         self.performSegue(withIdentifier: "showConsole", sender: c)
     }
     
+    // MARK: -
+    
+    @IBAction func compareCSVWithLocalizations(_ sender: Any) {
+        if !self.updateStringsFromCSV() {
+            return
+        }
+        
+        let lprojURLs = self.findLocalizedProjectURLs(fromURL: self.urlToProject)
+        
+        if lprojURLs.count == 0 {
+            print("Project has no localizations!")
+            return
+        }
+        
+        guard let stringsRegEx = try? NSRegularExpression(pattern: "\"([^\"]*)\"\\s*=\\s*\"([^\"]*)\";", options: []) else {
+            print("Incorrect regular expression")
+            return
+        }
+        
+        self.loadingIndicator.startAnimation(self)
+        
+        var enKeysAndValues = [String: String]()
+        
+        for lprojURL in lprojURLs {
+            let langCode = lprojURL.lastPathComponent
+            
+            if !langCode.hasPrefix("en") {
+                continue
+            }
+            
+            let fileURL = lprojURL.appendingPathComponent("Localizable.strings")
+            
+            guard let fileContents = try? String(contentsOf: fileURL, encoding: .utf8) else {
+                continue
+            }
+            
+            let fileContentsRange = NSMakeRange(0, fileContents.distance(from: fileContents.startIndex, to: fileContents.endIndex))
+            
+            let matches = stringsRegEx.matches(in: fileContents, options: [], range: fileContentsRange)
+            
+            for match in matches {
+                if match.numberOfRanges <= 2 {
+                    continue
+                }
+                
+                let keyRange = match.rangeAt(1)
+                let valueRange = match.rangeAt(2)
+                
+                let key = (fileContents as NSString).substring(with: keyRange)
+                let value = (fileContents as NSString).substring(with: valueRange)
+                
+                enKeysAndValues[key] = value
+            }
+        }
+        
+        
+        
+        self.loadingIndicator.stopAnimation(self)
+    }
     
     // MARK: -
     
